@@ -1,0 +1,103 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+    id 'org.sonarqube' version '5.1.0.4882'
+}
+
+group = 'br.com.hackaton-fiap'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.0.2'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.2.5'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.12.0'
+
+    // Keycloak Spring Boot Adapter
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.keycloak:keycloak-admin-client:24.0.2'
+    implementation 'org.jboss.resteasy:resteasy-client:6.2.4.Final'
+    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:6.2.4.Final'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.outputLocation = layout.buildDirectory.dir('jacocoReport')
+    }
+
+    classDirectories.setFrom(excludeClasses(classDirectories))
+}
+
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+
+    violationRules {
+        rule {
+            enabled = true
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
+
+    classDirectories.setFrom(excludeClasses(classDirectories))
+}
+
+def excludeClasses(def classDirectories) {
+    return files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: [
+                '**/config/**',
+                '**/db/**',
+                '**/handlers/**',
+                '**/ports/**',
+                '**/domain/**',
+                '**/entity/**',
+                '**/exception/**',
+                '**/utils/**',
+                '**/dtos/**',
+                '**/*DTO.class',
+                '**/entities/**',
+                '**/interfaces/**',
+                '**/*Mapper.class',
+                '**/*Handler.class',
+                '**/*Application.class'
+        ])
+    })
+}

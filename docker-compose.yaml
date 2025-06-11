@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  user-management-application:
+    build: .
+    container_name: user-management-application
+    image: gtbarbosa/fiap-user-management-application:latest
+    networks:
+      - vehicle-application-network
+    environment:
+      - APP_PORT=8082
+      - ISSUER_URI=http://keycloak:8080/realms/user-management
+      - AUTHORIZATION_URI=http://keycloak:8080/realms/user-management/protocol/openid-connect/auth
+      - TOKEN_URI=http://keycloak:8080/realms/user-management/protocol/openid-connect/token
+      - USER_INFO_URI=http://keycloak:8080/realms/user-management/protocol/openid-connect/userinfo
+      - JWK_SET_URI=http://keycloak:8080/realms/user-management/protocol/openid-connect/certs
+      - REALM=user-management
+      - KEYCLOAK_AUTH_SERVER_URL=http://keycloak:8080
+      - KEYCLOAK_CLIENT_ID=user-management-client
+      - KEYCLOAK_CLIENT_SECRET=3HueGwd2FS6qDQkBmh0PuoJXHxX1INnr
+      - KEYCLOAK_ADMIN_USERNAME=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8082:8082"
+    depends_on:
+      - keycloak
+    restart: on-failure
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.5
+    container_name: keycloak
+    command:
+      - start-dev
+      - --import-realm
+    networks:
+      - vehicle-application-network
+    ports:
+      - "8080:8080"
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    volumes:
+      - ./keycloak/imports:/opt/keycloak/data/import
+
+networks:
+  vehicle-application-network:
+    external: true

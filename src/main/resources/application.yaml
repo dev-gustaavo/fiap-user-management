@@ -1,0 +1,40 @@
+server:
+  port: ${APP_PORT:8082}
+
+spring:
+  application:
+    name: ${APP_NAME:user-api}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI:http://localhost:8081/realms/user-management}
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:8081/realms/user-management/protocol/openid-connect/certs}
+      client:
+        registration:
+          keycloak:
+            client-id: ${KEYCLOAK_CLIENT_ID:user-management-client}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:3HueGwd2FS6qDQkBmh0PuoJXHxX1INnr}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: ${ISSUER_URI:http://localhost:8081/realms/user-management}
+            authorization-uri: ${AUTHORIZATION_URI:http://localhost:8081/realms/user-management/protocol/openid-connect/auth}
+            token-uri: ${TOKEN_URI:http://localhost:8081/realms/user-management/protocol/openid-connect/token}
+            user-info-uri: ${USER_INFO_URI:http://localhost:8081/realms/user-management/protocol/openid-connect/userinfo}
+            jwk-set-uri: ${JWK_SET_URI:http://localhost:8081/realms/user-management/protocol/openid-connect/certs}
+keycloak:
+  realm: user-management
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8081}
+  client-id: ${KEYCLOAK_CLIENT_ID:user-management-client}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:3HueGwd2FS6qDQkBmh0PuoJXHxX1INnr}
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
