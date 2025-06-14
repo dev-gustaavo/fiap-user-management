@@ -1,0 +1,61 @@
+name: Cria o PR para a release
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  pr-to-release-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "gtbarbosa@live.com"
+          git config --global user.name "gustavo-dev"
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Verificar e criar branch release se necessário
+        run: |
+          if git show-ref --verify --quiet refs/heads/release; then
+            echo "Branch release existe localmente"
+          elif git show-ref --verify --quiet refs/remotes/origin/release; then
+            echo "Branch release existe no remote, fazendo checkout"
+            git checkout -b release origin/release
+          else
+            echo "Branch release não existe, criando a partir da develop"
+            if git show-ref --verify --quiet refs/remotes/origin/main; then
+              echo "Criando release a partir de main"
+              git checkout -b release origin/main
+              git push origin release
+            else
+              echo "Erro: Branch main não encontrada"
+              exit 1
+            fi
+          fi
+
+      - name: Verificar se já existe PR aberto para release
+        id: check_pr
+        run: |
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          PR_EXISTS=$(gh pr list --base release --head $BRANCH_NAME --json url --jq 'length')
+          echo "PR_EXISTS=$PR_EXISTS" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        if: env.PR_EXISTS == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base release --head ${{ env.BRANCH_NAME }} --title "PR da branch: ${{ env.BRANCH_NAME }} para a branch release" --body "PR criado automaticamente. From ${{ env.BRANCH_NAME }} to release."
