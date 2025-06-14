@@ -1,0 +1,84 @@
+name: Build, test & publish
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+
+jobs:
+  build_and_test:
+    name: "Build e teste unitario"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build and Test
+        run: ./gradlew clean build
+
+  criacao-pr-develop:
+    name: "Criação do PR para branch develop"
+    runs-on: ubuntu-latest
+    needs: build_and_test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "gtbarbosa@live.com"
+          git config --global user.name "gustavo-dev"
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Verificar e criar branch develop se necessário
+        run: |
+          if git show-ref --verify --quiet refs/heads/develop; then
+            echo "Branch develop existe localmente"
+          elif git show-ref --verify --quiet refs/remotes/origin/develop; then
+            echo "Branch develop existe no remote, fazendo checkout"
+            git checkout -b develop origin/develop
+          else
+            echo "Branch develop não existe, criando a partir da main/master"
+            if git show-ref --verify --quiet refs/remotes/origin/main; then
+              DEFAULT_BRANCH="main"
+            elif git show-ref --verify --quiet refs/remotes/origin/master; then
+              DEFAULT_BRANCH="master"
+            else
+              echo "Erro: Não foi possível encontrar branch principal (main ou master)"
+              exit 1
+            fi
+
+            echo "Criando develop a partir de $DEFAULT_BRANCH"
+            git checkout -b develop origin/$DEFAULT_BRANCH
+            git push origin develop
+          fi
+
+      - name: Verificar se já existe PR aberto para develop
+        id: check_pr
+        run: |
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          PR_EXISTS=$(gh pr list --base develop --head $BRANCH_NAME --json url --jq 'length')
+          echo "PR_EXISTS=$PR_EXISTS" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        if: env.PR_EXISTS == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base develop --head ${{ env.BRANCH_NAME }} --title "PR da branch: ${{ env.BRANCH_NAME }} para a branch develop" --body "PR criado automaticamente. From ${{ env.BRANCH_NAME }} to develop."
