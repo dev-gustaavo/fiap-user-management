@@ -35,12 +35,12 @@ jobs:
             git checkout -b release origin/release
           else
             echo "Branch release não existe, criando a partir da develop"
-            if git show-ref --verify --quiet refs/remotes/origin/develop; then
-              echo "Criando release a partir de develop"
-              git checkout -b release origin/develop
+            if git show-ref --verify --quiet refs/remotes/origin/main; then
+              echo "Criando release a partir de main"
+              git checkout -b release origin/main
               git push origin release
             else
-              echo "Erro: Branch develop não encontrada"
+              echo "Erro: Branch main não encontrada"
               exit 1
             fi
           fi
