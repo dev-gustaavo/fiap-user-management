@@ -1,5 +1,4 @@
-# Hackaton - API Users
-
+# User Management Application
 
 API responsável por fazer a criação do usuário, geração e validação do token de acesso.
 
