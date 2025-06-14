@@ -64,6 +64,8 @@ public class AuthGateway implements AuthOutboundPort {
             throw new UserException("E-mail ou senha inválidos");
         } catch (HttpClientErrorException e) {
             throw new UserException("Erro na autenticação: " + e.getMessage());
+        } catch (UserException e) {
+            throw new UserException("Falha na autenticação");
         } catch (Exception e) {
             throw new UserException("Erro interno na autenticação: " + e.getMessage(), e);
         }
