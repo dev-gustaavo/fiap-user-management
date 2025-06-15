@@ -21,50 +21,46 @@ API responsável por fazer a criação do usuário, geração e validação do t
 kubectl apply -f kubernetes --recursive  # você vai criar todos os recursos kubernetes que estão dentro da pasta 'kubernetes/'
 ```
 
-### Obs.: Caso esteja utilizando o minikube para rodar seu cluster local, é necessário executar o campo abaixo:
-```bash
-kubectl get svc # neste comando você listará todas as services. Localize a service do app
-kubectl port-forward svc-lanchonete-app-cliente 8080:80 # neste comando você vai direcionar todas as chamadas da porta 8080 para a porta 80 do cluster
-```
-
 #### Após os passos acima, a API estará funcionando e será possível realizar as operações, conforme descrito abaixo.
 
 # Passo a passo funcional da API
 
 ### **Operações Disponíveis nesta API**
 ![POST](https://img.shields.io/badge/POST-green?style=for-the-badge)  
-**Rota:** `/create`  
+**Rota:** `/user/create`  
 **Descrição:** Realiza o cadastro de um usuário.  
 **Body:**
 
 ```json
 {
-   "email": "string",
-   "password": "string"
+   "firstName": "Gustavo",
+   "lastName": "Barbosa",
+   "email": "gtbarbosa4@teste.com.br",
+   "password": "123456"
 }
 ```
 
 ![POST](https://img.shields.io/badge/POST-green?style=for-the-badge)  
-**Rota:** `/auth`  
-**Descrição:** Faz a geração do JWT.
+**Rota:** `/auth/login`  
+**Descrição:** Faz a geração do JWT.  
 **Body:**
 
 ```json
 {
-   "email": "string",
-   "password": "string"
+   "email": "gtbarbosa4@teste.com.br",
+   "password": "123456"
 }
 ```
 
 ![POST](https://img.shields.io/badge/POST-green?style=for-the-badge)  
-**Rota:** `/auth/validate`  
-**Descrição:** Realiza a validação do JWT.
+**Rota:** `/token/validate`  
+**Descrição:** Realiza a validação do JWT.  
 **Header**: Authorization: Bearer <jwt>
 
 # Documentações
 ## Desenho da arquitetura
 
-![Desenho de arquitetura](desenho-arquitetura-Página-1.jpg)
+![Desenho de arquitetura](arquitetura.png)
 
 # Relatório de cobertura de teste
 
