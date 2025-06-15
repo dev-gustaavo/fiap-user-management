@@ -75,3 +75,4 @@ kubectl port-forward svc-lanchonete-app-cliente 8080:80 # neste comando você va
 **Localização do relatório**: build/jacocoReport/index.html  
 **Cobertura mínima**: 90%
 ![relatorio-teste.png](relatorio-teste.png)
+
