@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-service
+  namespace: default
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8081          # Porta interna do cluster
+      targetPort: 8080    # Porta do container Keycloak
+      nodePort: 30080     # Porta externa (opcional, será atribuída automaticamente se omitida)
+      protocol: TCP
+  type: NodePort

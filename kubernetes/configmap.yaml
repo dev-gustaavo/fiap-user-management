@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-configmap-user-management
+  namespace: default
+data:
+  APP_NAME: "user-api"
+  APP_PORT: "80"
+  ISSUER_URI: "http://keycloak-service:8081/realms/user-management"
+  JWK_SET_URI: "http://keycloak-service:8081/realms/user-management/protocol/openid-connect/certs"
+  AUTHORIZATION_URI: "http://keycloak-service:8081/realms/user-management/protocol/openid-connect/auth"
+  TOKEN_URI: "http://keycloak-service:8081/realms/user-management/protocol/openid-connect/token"
+  USER_INFO_URI: "http://keycloak-service:8081/realms/user-management/protocol/openid-connect/userinfo"
+  KEYCLOAK_CLIENT_ID: "user-management-client"
+  KEYCLOAK_AUTH_SERVER_URL: "http://keycloak-service:8081"
+  REALM: "user-management"
+  KEYCLOAK_ADMIN_USERNAME: "admin"
+  KEYCLOAK_ADMIN_PASSWORD: "admin"
