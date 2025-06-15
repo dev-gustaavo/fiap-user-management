@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.2.5
+          command:
+            - "/opt/keycloak/bin/kc.sh"
+            - "start-dev"
+            - "--import-realm"
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            # Configurações de Admin
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-configmap
+                  key: KC_BOOTSTRAP_ADMIN_USERNAME
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-configmap
+                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
+
+            # Configurações de Rede
+            - name: KC_HOSTNAME_STRICT
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-configmap
+                  key: KC_HOSTNAME_STRICT
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-configmap
+                  key: KC_HOSTNAME_STRICT_HTTPS
+            - name: KC_HTTP_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak-configmap
+                  key: KC_HTTP_ENABLED
+
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm-config
+
+      restartPolicy: Always

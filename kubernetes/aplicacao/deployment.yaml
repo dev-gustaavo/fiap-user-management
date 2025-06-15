@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-user-management
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-user-management
+  template:
+    metadata:
+      labels:
+        app: pod-user-management
+    spec:
+      containers:
+        - name: container-user-management
+          image: gtbarbosa/fiap-user-management-application:latest
+          env:
+            # Configurações da Aplicação
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: APP_NAME
+            - name: APP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: APP_PORT
+
+            # Configurações OAuth2/JWT
+            - name: ISSUER_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: ISSUER_URI
+            - name: JWK_SET_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: JWK_SET_URI
+            - name: AUTHORIZATION_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: AUTHORIZATION_URI
+            - name: TOKEN_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: TOKEN_URI
+            - name: USER_INFO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: USER_INFO_URI
+
+            # Configurações do Cliente Keycloak
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: KEYCLOAK_CLIENT_ID
+            - name: KEYCLOAK_AUTH_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: KEYCLOAK_AUTH_SERVER_URL
+            - name: KEYCLOAK_ADMIN_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: KEYCLOAK_ADMIN_USERNAME
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: app-configmap-user-management
+                  key: KEYCLOAK_ADMIN_PASSWORD
+
+            # Secret do Keycloak
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret-user
+                  key: KEYCLOAK_CLIENT_SECRET
+
+          ports:
+            - containerPort: 80
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "700m"
+              memory: "768Mi"
+
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
