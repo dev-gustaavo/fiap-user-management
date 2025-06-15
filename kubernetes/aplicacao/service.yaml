@@ -5,11 +5,12 @@ metadata:
   labels:
     app: svc-user
 spec:
-  type: NodePort
+#  type: NodePort
+  type: LoadBalancer
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-      nodePort: 32702
+#      nodePort: 32702
   selector:
     app: pod-user-management
